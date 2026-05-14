@@ -1,0 +1,89 @@
+{
+  "intents": [
+    {
+      "tag": "greeting",
+      "patterns": ["hello", "hi", "hey", "good morning", "good afternoon", "good evening", "howdy", "greetings", "sup", "what's up"],
+      "responses": [
+        "Hello! Welcome to TravelMate ✈️ How can I help you today?",
+        "Hi there! I'm TravelMate, your travel assistant. What are you planning?",
+        "Hey! Ready to plan your next adventure? 🌍"
+      ]
+    },
+    {
+      "tag": "farewell",
+      "patterns": ["bye", "goodbye", "see you", "take care", "later", "quit", "exit", "farewell"],
+      "responses": [
+        "Goodbye! Have a wonderful trip! ✈️",
+        "Safe travels! Come back anytime 🌍",
+        "Bye! Hope to help you plan your next adventure soon!"
+      ]
+    },
+    {
+      "tag": "thanks",
+      "patterns": ["thank you", "thanks", "thank you so much", "thanks a lot", "cheers", "appreciate it"],
+      "responses": [
+        "You're welcome! 😊",
+        "Happy to help! Is there anything else you need?",
+        "Anytime! Let me know if you need more travel advice."
+      ]
+    },
+    {
+      "tag": "packages",
+      "patterns": ["packages", "tour", "holiday", "vacation", "deals", "offers", "what do you have", "show packages", "available tours", "travel packages", "trips"],
+      "responses": ["__SEARCH_PACKAGES__"]
+    },
+    {
+      "tag": "price",
+      "patterns": ["price", "cost", "how much", "expensive", "cheap", "budget", "affordable", "fee"],
+      "responses": ["__SEARCH_PACKAGES__"]
+    },
+    {
+      "tag": "destination",
+      "patterns": ["destination", "where", "country", "city", "place", "location", "visit", "go to", "travel to"],
+      "responses": ["__SEARCH_PACKAGES__"]
+    },
+    {
+      "tag": "duration",
+      "patterns": ["how long", "duration", "days", "nights", "weeks", "length", "how many days"],
+      "responses": ["__SEARCH_PACKAGES__"]
+    },
+    {
+      "tag": "booking",
+      "patterns": ["book", "reserve", "booking", "reservation", "purchase", "buy", "sign up", "register"],
+      "responses": [
+        "To book a package, please call us at +94 11 234 5678 or email bookings@travelmate.lk 📞",
+        "You can reserve any package by contacting our team at bookings@travelmate.lk ✉️"
+      ]
+    },
+    {
+      "tag": "visa",
+      "patterns": ["visa", "passport", "travel document", "permit", "entry requirement"],
+      "responses": [
+        "Visa requirements depend on your destination and nationality. I recommend checking the official embassy website or contacting us for guidance. 🛂",
+        "We can assist with visa guidance! Requirements vary by country — contact our team for personalized advice."
+      ]
+    },
+    {
+      "tag": "insurance",
+      "patterns": ["insurance", "travel insurance", "coverage", "medical", "emergency"],
+      "responses": [
+        "We highly recommend travel insurance for all trips! It covers medical emergencies, trip cancellations, and lost luggage. Ask us for partner insurance quotes. 🛡️"
+      ]
+    },
+    {
+      "tag": "weather",
+      "patterns": ["weather", "climate", "temperature", "rain", "season", "best time", "when to go"],
+      "responses": [
+        "The best time to travel varies by destination! Generally: Europe is best May–Sep, Southeast Asia Nov–Feb, Maldives Nov–Apr. Want details on a specific place? 🌤️"
+      ]
+    },
+    {
+      "tag": "about",
+      "patterns": ["who are you", "what are you", "tell me about yourself", "what can you do", "help", "how can you help"],
+      "responses": [
+        "I'm TravelMate 🤖✈️ — your AI travel assistant! I can help you explore holiday packages, answer travel questions, and even learn from you. What would you like to know?",
+        "I'm TravelMate! I can show you available tour packages, answer travel FAQs, and help plan your perfect holiday. Just ask!"
+      ]
+    }
+  ]
+}
