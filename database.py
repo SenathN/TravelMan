@@ -128,6 +128,8 @@ def search_packages(keyword):
     """Search packages by keyword in name, destination, or description."""
     conn = get_connection()
     cursor = conn.cursor()
+    
+    # Try exact-ish match first
     like = f"%{keyword}%"
     cursor.execute("""
         SELECT name, destination, duration, price_usd, description
@@ -135,6 +137,8 @@ def search_packages(keyword):
         WHERE name LIKE ? OR destination LIKE ? OR description LIKE ?
     """, (like, like, like))
     rows = cursor.fetchall()
+    
+    # If no results, try a broader search or let the engine handle fuzzy
     conn.close()
     return [
         {"name": r[0], "destination": r[1], "duration": r[2], "price": r[3], "description": r[4]}
