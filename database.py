@@ -5,21 +5,93 @@ Handles: packages table, learned_responses table
 
 import sqlite3
 import os
+import sys
+import shutil
 
-# Path to the database file (created automatically on first run)
-DB_PATH = os.path.join(os.path.dirname(__file__), "chatbot.db")
+def get_data_path(filename):
+    """ Get path to persistent data in user's home directory """
+    if sys.platform == "win32":
+        # Windows: %APPDATA%/TravelMate
+        app_data = os.environ.get("APPDATA")
+        if not app_data:
+            app_data = os.path.expanduser("~")
+        base_path = os.path.join(app_data, "TravelMate")
+    else:
+        # Linux/macOS: ~/.travelmate
+        base_path = os.path.expanduser("~/.travelmate")
+    
+    try:
+        if not os.path.exists(base_path):
+            os.makedirs(base_path)
+    except Exception:
+        # Fallback to current directory if home is not writable
+        base_path = "."
+        
+    return os.path.join(base_path, filename)
 
+def _get_seed_db_path():
+    """Return the bundled clean seed DB path if available."""
+    meipass = getattr(sys, '_MEIPASS', None)
+    candidates = []
+    if meipass:
+        candidates.extend([
+            os.path.join(meipass, 'data', 'seed_chatbot.db'),
+            os.path.join(meipass, 'seed_chatbot.db')
+        ])
+    candidates.append(os.path.join(os.path.dirname(__file__), 'data', 'seed_chatbot.db'))
+
+    for candidate in candidates:
+        if os.path.exists(candidate):
+            return candidate
+    return None
+
+
+def _user_db_needs_seed(path):
+    """Return True if the user DB is missing or contains no package rows."""
+    if not os.path.exists(path):
+        return True
+    try:
+        conn = sqlite3.connect(path)
+        cursor = conn.cursor()
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='packages'")
+        if not cursor.fetchone():
+            return True
+        cursor.execute("SELECT COUNT(*) FROM packages")
+        count = cursor.fetchone()[0]
+        return count == 0
+    except Exception:
+        return True
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
+
+# Path to the user database file (the running app stores learned responses here)
+USER_DB_PATH = get_data_path("chatbot.db")
+DB_PATH = USER_DB_PATH
 
 def get_connection():
     """Return a connection to the SQLite database."""
     return sqlite3.connect(DB_PATH)
-
 
 def initialise_db():
     """
     Create tables if they don't exist and seed initial package data.
     Called once at bot startup.
     """
+    print(f"[DB] Initialising database at {DB_PATH}...")
+    
+    # 1. Check if we need to seed from a bundled DB file
+    seeded_db_src = _get_seed_db_path()
+    if seeded_db_src and _user_db_needs_seed(DB_PATH):
+        try:
+            print(f"[DB] Seeding from bundled database: {seeded_db_src}")
+            shutil.copyfile(seeded_db_src, DB_PATH)
+            print(f"[DB] Successfully seeded from {os.path.basename(seeded_db_src)}")
+        except Exception as e:
+            print(f"[DB] Warning: Failed to copy seeded DB: {e}")
+
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -46,14 +118,17 @@ def initialise_db():
         )
     """)
 
-    # Seed packages only if table is empty
+    # Seed packages only if table is empty (fallback if seed file missing or empty)
     cursor.execute("SELECT COUNT(*) FROM packages")
     if cursor.fetchone()[0] == 0:
+        print("[DB] Seeding packages from internal data...")
         _seed_packages(cursor)
+    else:
+        print("[DB] Database already contains package data.")
 
     conn.commit()
     conn.close()
-    print("[DB] Database initialised successfully.")
+    print("[DB] Database initialisation complete.")
 
 
 def _seed_packages(cursor):

@@ -9,16 +9,72 @@ Tkinter-based chat interface with:
 import tkinter as tk
 from tkinter import scrolledtext, messagebox
 import threading
+import time
 import database
 import engine
-
-# Initialize database on startup
-database.initialise_db()
-
 
 class TravelMateGUI:
     def __init__(self, root):
         self.root = root
+        self.root.withdraw()  # Hide main window during splash
+
+        # Show splash screen
+        self.splash = tk.Toplevel()
+        self.splash.title("Loading TravelMate...")
+        self.splash.geometry("300x200")
+        self.splash.configure(bg="#2c3e50")
+        self.splash.overrideredirect(True)  # No window decorations
+        
+        # Center splash
+        screen_width = self.splash.winfo_screenwidth()
+        screen_height = self.splash.winfo_screenheight()
+        x = (screen_width // 2) - 150
+        y = (screen_height // 2) - 100
+        self.splash.geometry(f"300x200+{x}+{y}")
+
+        tk.Label(
+            self.splash, 
+            text="✈️ TravelMate", 
+            font=("Arial", 20, "bold"), 
+            bg="#2c3e50", 
+            fg="white"
+        ).pack(expand=True)
+        
+        self.loading_label = tk.Label(
+            self.splash, 
+            text="Initializing AI Engine...", 
+            font=("Arial", 10), 
+            bg="#2c3e50", 
+            fg="#bdc3c7"
+        )
+        self.loading_label.pack(pady=(0, 20))
+
+        # Start initialization in background
+        threading.Thread(target=self._initialize, daemon=True).start()
+
+    def _initialize(self):
+        """Heavy initialization happens here."""
+        try:
+            # 1. Initialize Database
+            database.initialise_db()
+            
+            # 2. Initialize Engine (NLTK downloads, etc.)
+            engine.initialize_engine()
+            
+            # small delay for smooth transition
+            time.sleep(1) 
+            
+            # 3. Setup Main UI (on main thread)
+            self.root.after(0, self._show_main_ui)
+        except Exception as e:
+            self.root.after(0, lambda: messagebox.showerror("Initialization Error", str(e)))
+            self.root.after(0, self.root.destroy)
+
+    def _show_main_ui(self):
+        """Transitions from splash to main UI."""
+        self.splash.destroy()
+        self.root.deiconify()  # Show main window
+        
         self.root.title("TravelMate ✈️ — Your AI Travel Assistant")
         self.root.geometry("600x700")
         self.root.configure(bg="#f0f0f0")
@@ -217,22 +273,58 @@ class TravelMateGUI:
 
     def _handle_learning_response(self, answer):
         """Save the learned response and exit learning mode."""
-        if not answer.strip():
+        cleaned = answer.strip()
+        if not cleaned:
             self._add_bot_message("Okay, I won't learn that one.")
-        else:
-            engine.learn_response(self.pending_question, answer)
-            self._add_bot_message(f"Thanks! I've learned that '{self.pending_question}' → '{answer}'")
+            self.learning_mode = False
+            self.pending_question = None
+            return
+
+        # Reject or confirm obviously invalid answers (e.g., a single digit)
+        if cleaned.isdigit() or len(cleaned) < 3:
+            confirm = messagebox.askyesno("Confirm Learning",
+                "The response you provided looks very short or numeric. Do you still want me to learn it?")
+            if not confirm:
+                # Keep learning mode active and ask for a clearer answer
+                self._add_bot_message("Okay — please provide a clearer, human-readable answer for me to learn.")
+                return
+
+        # Save learned response
+        try:
+            engine.learn_response(self.pending_question, cleaned)
+            self._add_bot_message(f"Thanks! I've learned that '{self.pending_question}' → '{cleaned}'")
+        except Exception as e:
+            self._add_bot_message(f"Sorry, I couldn't save that answer: {e}")
 
         self.learning_mode = False
         self.pending_question = None
 
 
-def main():
-    """Run the TravelMate GUI application."""
-    root = tk.Tk()
-    app = TravelMateGUI(root)
-    root.mainloop()
-
-
 if __name__ == "__main__":
-    main()
+    try:
+        # Ensure database exists before launching GUI (safe idempotent call)
+        try:
+            database.initialise_db()
+        except Exception:
+            # Continue startup; GUI splash will also attempt initialization
+            pass
+
+        root = tk.Tk()
+        app = TravelMateGUI(root)
+        root.mainloop()
+    except Exception as e:
+        # Catch any errors during startup (e.g., import errors)
+        import tkinter as tk
+        from tkinter import messagebox
+        import traceback
+        
+        # If root doesn't exist yet, create a hidden one for the messagebox
+        try:
+            temp_root = tk.Tk()
+            temp_root.withdraw()
+            messagebox.showerror("Fatal Error", f"TravelMate failed to start:\n\n{str(e)}\n\n{traceback.format_exc()}")
+            temp_root.destroy()
+        except:
+            # Fallback if even tkinter fails
+            print(f"Fatal Error: {e}")
+            traceback.print_exc()

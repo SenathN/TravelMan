@@ -6,6 +6,7 @@ Implements three AI traits:
 3. Learning — stores new Q&A pairs learned from user interaction
 """
 
+import sys
 import os
 import json
 import random
@@ -17,26 +18,58 @@ from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 import database
 
-# Set NLTK data path to current directory to avoid permission issues
-nltk_data_path = os.path.join(os.path.dirname(__file__), "nltk_data")
-if not os.path.exists(nltk_data_path):
-    os.makedirs(nltk_data_path)
+def get_resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.dirname(os.path.abspath(__file__))
+
+    return os.path.join(base_path, relative_path)
+
+# Set NLTK data path
+nltk_data_path = get_resource_path("nltk_data")
 nltk.data.path.append(nltk_data_path)
 
-# Download required NLTK data (only first time)
-nltk.download('punkt', download_dir=nltk_data_path, quiet=True)
-nltk.download('wordnet', download_dir=nltk_data_path, quiet=True)
-nltk.download('omw-1.4', download_dir=nltk_data_path, quiet=True)
-nltk.download('stopwords', download_dir=nltk_data_path, quiet=True)
+def initialize_engine():
+    """Ensure NLTK data is available and prepare lemmatizer."""
+    if not os.path.exists(nltk_data_path):
+        os.makedirs(nltk_data_path)
+    
+    # Try to download if missing, but handle errors gracefully for offline use
+    for package in ['punkt', 'wordnet', 'omw-1.4', 'stopwords']:
+        try:
+            nltk.download(package, download_dir=nltk_data_path, quiet=True)
+        except Exception as e:
+            print(f"[Engine] Warning: Could not download {package}: {e}")
+    
+    global lemmatizer, stop_words, intents_data
+    try:
+        lemmatizer = WordNetLemmatizer()
+        stop_words = set(stopwords.words('english'))
+        stop_words.update({'travel', 'trip', 'holiday', 'vacation', 'package', 'tour'})
+    except Exception as e:
+        print(f"[Engine] Error initializing NLTK components: {e}")
+        # Fallback if NLTK data is completely missing
+        class DummyLemmatizer:
+            def lemmatize(self, word): return word
+        lemmatizer = DummyLemmatizer()
+        stop_words = set()
 
-# Load static knowledge base (intents.json)
-with open('intents.json', 'r') as f:
-    intents_data = json.load(f)
+    # Load static knowledge base (intents.json)
+    intents_path = get_resource_path('intents.json')
+    try:
+        with open(intents_path, 'r', encoding='utf-8') as f:
+            intents_data = json.load(f)
+    except Exception as e:
+        print(f"[Engine] Error loading intents.json from {intents_path}: {e}")
+        intents_data = {"intents": []}
 
-lemmatizer = WordNetLemmatizer()
-stop_words = set(stopwords.words('english'))
-# Add common domain words to stop words to avoid noisy matching (e.g., 'travel' matching 'trail')
-stop_words.update({'travel', 'trip', 'holiday', 'vacation', 'package', 'tour'})
+# Global variables (initialized as None)
+lemmatizer = None
+stop_words = None
+intents_data = None
 CONTINENTS = {'asia', 'europe', 'america', 'africa', 'oceania', 'middle east', 'caribbean'}
 
 
