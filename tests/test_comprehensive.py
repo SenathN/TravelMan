@@ -16,7 +16,7 @@ class TestTravelMateComprehensive(unittest.TestCase):
         self.assertTrue(any(word in response for word in ["Hello", "Hi", "Hey"]), f"Greeting response unexpected: {response}")
 
         # 2. Search package
-        response = engine.process_user_input("Bali")
+        response = engine.process_user_input("Show me Bali packages")
         self.assertIn("Bali Bliss", response)
 
         # 3. Learning

@@ -29,7 +29,7 @@
     },
     {
       "tag": "packages",
-      "patterns": ["packages", "tour", "holiday", "vacation", "deals", "offers", "what do you have", "show packages", "available tours", "travel packages", "trips"],
+      "patterns": ["packages", "tour", "holiday", "vacation", "deals", "offers", "what do you have", "show packages", "available tours", "travel packages", "trips", "asia", "europe", "america", "africa", "oceania", "middle east", "caribbean"],
       "responses": ["__SEARCH_PACKAGES__"]
     },
     {
@@ -79,7 +79,7 @@
     },
     {
       "tag": "about",
-      "patterns": ["who are you", "what are you", "tell me about yourself", "what can you do", "help", "how can you help"],
+      "patterns": ["who are you", "what are you", "what is travelmate", "about you", "what can you do", "help", "how can you help"],
       "responses": [
         "I'm TravelMate 🤖✈️ — your AI travel assistant! I can help you explore holiday packages, answer travel questions, and even learn from you. What would you like to know?",
         "I'm TravelMate! I can show you available tour packages, answer travel FAQs, and help plan your perfect holiday. Just ask!"
