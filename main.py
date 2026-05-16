@@ -87,13 +87,64 @@ class TravelMateGUI:
             bg="#2c3e50",
             fg="white",
             relief="flat",
-            width=10,
+            width=8,
             command=self.send_message
         )
-        send_button.pack(side="right")
+        send_button.pack(side="right", padx=(5, 0))
+
+        # Action buttons frame
+        actions_frame = tk.Frame(self.root, bg="#f0f0f0")
+        actions_frame.pack(fill="x", padx=10, pady=(0, 10))
+
+        # Clear button
+        clear_button = tk.Button(
+            actions_frame,
+            text="🗑️ Clear Chat",
+            font=("Arial", 9),
+            bg="#95a5a6",
+            fg="white",
+            relief="flat",
+            command=self.clear_chat
+        )
+        clear_button.pack(side="left", padx=2)
+
+        # Save button
+        save_button = tk.Button(
+            actions_frame,
+            text="💾 Save Log",
+            font=("Arial", 9),
+            bg="#95a5a6",
+            fg="white",
+            relief="flat",
+            command=self.save_chat
+        )
+        save_button.pack(side="left", padx=2)
 
         # Welcome message
         self._add_bot_message("Hello! I'm TravelMate ✈️\nI can help you find holiday packages, answer travel questions, and learn from you.\n\nHow can I assist you today?")
+
+    def clear_chat(self):
+        """Clear the chat display."""
+        if messagebox.askyesno("Clear Chat", "Are you sure you want to clear the chat history?"):
+            self.chat_display.config(state="normal")
+            self.chat_display.delete(1.0, "end")
+            self.chat_display.config(state="disabled")
+            self._add_bot_message("Chat cleared! How can I help you now?")
+
+    def save_chat(self):
+        """Save chat history to a text file."""
+        content = self.chat_display.get(1.0, "end").strip()
+        if not content:
+            messagebox.showinfo("Save Chat", "Nothing to save!")
+            return
+
+        try:
+            filename = "chat_log.txt"
+            with open(filename, "w", encoding="utf-8") as f:
+                f.write(f"--- TravelMate Chat Log ---\n\n{content}")
+            messagebox.showinfo("Save Chat", f"Chat history saved to {filename}")
+        except Exception as e:
+            messagebox.showerror("Save Chat", f"Error saving chat: {e}")
 
     def _add_message(self, message, sender):
         """Add a message to the chat display with appropriate styling."""
@@ -144,7 +195,7 @@ class TravelMateGUI:
         """Process user input through the engine."""
         if self.learning_mode:
             # User is teaching the bot
-            self._handle_learning_response(user_input)
+            self.root.after(0, lambda: self._handle_learning_response(user_input))
             return
 
         # Normal processing
@@ -152,10 +203,10 @@ class TravelMateGUI:
 
         if response:
             # Bot knows the answer
-            self._add_bot_message(response)
+            self.root.after(0, lambda: self._add_bot_message(response))
         else:
             # Bot doesn't know — enter learning mode
-            self._enter_learning_mode(user_input)
+            self.root.after(0, lambda: self._enter_learning_mode(user_input))
 
     def _enter_learning_mode(self, question):
         """Enter learning mode to ask user for the correct answer."""

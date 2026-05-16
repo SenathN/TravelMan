@@ -158,46 +158,84 @@ def search_packages_response(user_input):
     """
     AI Trait 2: Searching
     Query SQLite database for packages matching keywords in user input.
-    Robust against typos and multiple keywords.
+    Robust against typos, multiple keywords, and handles superlatives (cheapest, etc.).
     """
-    # Get keywords (lemmatized, no stop words, only meaningful ones)
+    # 1. Preprocess and identify intent context
+    raw_tokens = word_tokenize(user_input.lower())
     keywords = preprocess_input(user_input, remove_stopwords=True)
     
+    # Contextual keywords that should NOT trigger a specific destination search
+    context_keywords = [
+        'package', 'tour', 'deal', 'offer', 'trip', 'holiday', 'vacation', 
+        'available', 'show', 'list', 'give', 'find', 'cheapest', 'cheap', 
+        'lowest', 'budget', 'expensive', 'luxurious', 'luxury', 'highest', 
+        'best', 'premium', 'price', 'cost', 'money', 'value'
+    ]
+    
+    sort_by_price_asc = any(w in raw_tokens for w in ['cheapest', 'cheap', 'lowest', 'budget'])
+    sort_by_price_desc = any(w in raw_tokens for w in ['expensive', 'luxurious', 'luxury', 'highest', 'best', 'premium'])
+    
+    # 2. Search for specific destinations/names
     all_results = []
     seen_names = set()
-
-    # Get all packages once to do fuzzy matching if needed
     all_packages = database.get_all_packages()
+    
     destinations = [p['destination'].lower() for p in all_packages]
     names = [p['name'].lower() for p in all_packages]
-
+    
+    found_specific_destination = False
+    
     for kw in keywords:
-        if len(kw) < 3: continue
-        
-        # 1. Try direct DB search
+        # Ignore very short words or general context words
+        if len(kw) < 3 or kw in context_keywords:
+            continue
+            
+        # Try direct search
         packages = database.search_packages(kw)
         
-        # 2. If no direct match, try fuzzy match against destinations/names
+        # Try fuzzy search
         if not packages:
-            fuzzy_dest = difflib.get_close_matches(kw, destinations, n=1, cutoff=0.7)
-            fuzzy_name = difflib.get_close_matches(kw, names, n=1, cutoff=0.7)
-            
-            search_terms = fuzzy_dest + fuzzy_name
-            for term in search_terms:
-                # Extract a good keyword from the matched term (e.g. "Bali" from "Bali, Indonesia")
-                simple_kw = term.split(',')[0].split(' ')[0]
-                packages.extend(database.search_packages(simple_kw))
+            # Balanced cutoff for typo tolerance without false positives
+            fuzzy_matches = difflib.get_close_matches(kw, destinations + names, n=1, cutoff=0.6)
+            for match in fuzzy_matches:
+                # Extract first word to search (e.g., "Bali" from "Bali, Indonesia")
+                search_term = match.split(',')[0].split(' ')[0]
+                packages.extend(database.search_packages(search_term))
+                
+        # Substring search as a last resort
+        if not packages:
+            for d in destinations + names:
+                if kw in d:
+                    search_term = d.split(',')[0].split(' ')[0]
+                    packages.extend(database.search_packages(search_term))
+                
+        if packages:
+            found_specific_destination = True
+            for pkg in packages:
+                if pkg['name'] not in seen_names:
+                    all_results.append(pkg)
+                    seen_names.add(pkg['name'])
 
-        for pkg in packages:
-            if pkg['name'] not in seen_names:
-                all_results.append(pkg)
-                seen_names.add(pkg['name'])
+    # 3. Decision Logic: Use full dataset if no specific destination was found 
+    # OR if the user is asking a general superlative question
+    if not found_specific_destination or (not all_results and (sort_by_price_asc or sort_by_price_desc)):
+        all_results = all_packages
 
     if not all_results:
         return "I couldn't find any packages matching your query. Try asking about 'Bali', 'Maldives', 'Europe', 'Thailand', 'Sri Lanka', or 'Dubai'."
 
-    # Format response with up to 3 packages
-    response = "Here are some packages I found:\n\n"
+    # 4. Apply Intelligence: Sorting
+    if sort_by_price_asc:
+        all_results.sort(key=lambda x: x['price'])
+        intro = "Based on your request, here are our most budget-friendly packages:\n\n"
+    elif sort_by_price_desc:
+        all_results.sort(key=lambda x: x['price'], reverse=True)
+        intro = "Based on your request, here are our premium luxury packages:\n\n"
+    else:
+        intro = "Here are some packages I found:\n\n"
+
+    # 5. Format Response
+    response = intro
     for pkg in all_results[:3]:
         response += f"📦 {pkg['name']}\n"
         response += f"   📍 {pkg['destination']}\n"

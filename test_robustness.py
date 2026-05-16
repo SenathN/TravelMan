@@ -19,10 +19,11 @@ def test_nlp_robustness():
         # --- TYPOS & FUZZY MATCHING ---
         ("Helllo there", "Hello!", "Typo"),
         ("pakages", "packages", "Typo"),
+        ("wht packges aare available", "packages", "Human-like/Typo"),
         ("destinaton", "packages", "Typo"),
         ("Bli tours", "Bali Bliss", "Typo/Entity"),
         ("Maldivs price", "Maldives Dream Escape", "Typo/Entity"),
-        ("Erope trip", "European Explorer", "Typo/Entity"),
+        ("Erope trip", "European Explorer (Europe)", "Typo/Entity"),
         
         # --- GRAMMAR & SYNTAX ---
         ("i wanting to go Bali", "Bali Bliss", "Grammar"),
@@ -45,7 +46,14 @@ def test_nlp_robustness():
         # --- COMPLEX/NATURAL ---
         ("I'm planning a holiday and I want to see what you have for Europe", "European Explorer", "Complex"),
         ("Can you please help me find a 7 day trip to Sri Lanka?", "Sri Lanka Heritage", "Complex"),
-        ("I am interested in visiting Dubai, how much does it cost?", "Dubai Luxury Getaway", "Complex")
+        ("I am interested in visiting Dubai, how much does it cost?", "Dubai Luxury Getaway", "Complex"),
+        
+        # --- INTELLIGENCE / SUPERLATIVES ---
+        ("whats the cheapest place", "budget-friendly", "Intelligence"),
+        ("what is the cheapest package", "Sri Lanka Heritage", "Intelligence"),
+        ("show me the most expensive luxury trip", "premium luxury", "Intelligence"),
+        ("lowest price packages", "budget-friendly", "Intelligence"),
+        ("best luxurious deals", "premium luxury", "Intelligence")
     ]
 
     print("="*60)
