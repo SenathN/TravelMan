@@ -61,7 +61,8 @@ with open(intents_file, 'r', encoding='utf-8') as f:
 lemmatizer = WordNetLemmatizer()
 stop_words = set(stopwords.words('english'))
 # Add common domain words to stop words to avoid noisy matching (e.g., 'travel' matching 'trail')
-stop_words.update({'travel', 'trip', 'holiday', 'vacation', 'package', 'tour'})
+# NOTE: We keep 'package', 'tour', 'trip', etc. as they are important keywords for intent matching
+stop_words.update({'a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being'}) 
 CONTINENTS = {'asia', 'europe', 'america', 'africa', 'oceania', 'middle east', 'caribbean'}
 
 

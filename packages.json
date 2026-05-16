@@ -1,0 +1,205 @@
+[
+  {
+    "name": "Bali Bliss",
+    "destination": "Bali, Indonesia",
+    "duration": "7 nights / 8 days",
+    "price_usd": 899.0,
+    "description": "Enjoy Ubud temples, rice terraces, and Seminyak beaches in Asia. Includes hotel & breakfast."
+  },
+  {
+    "name": "Maldives Dream Escape",
+    "destination": "Maldives",
+    "duration": "5 nights / 6 days",
+    "price_usd": 1499.0,
+    "description": "Overwater bungalow, snorkelling, sunset cruises in Asia. All-inclusive luxury package."
+  },
+  {
+    "name": "Thailand Adventure",
+    "destination": "Bangkok & Phuket, Thailand",
+    "duration": "8 nights / 9 days",
+    "price_usd": 749.0,
+    "description": "Street food tours in Bangkok, island hopping in Phuket, Asia. Budget-friendly & action-packed."
+  },
+  {
+    "name": "Sri Lanka Heritage",
+    "destination": "Colombo, Kandy & Sigiriya",
+    "duration": "6 nights / 7 days",
+    "price_usd": 599.0,
+    "description": "Explore ancient ruins, tea plantations, and wildlife safaris in Asia. A cultural deep dive."
+  },
+  {
+    "name": "Tokyo Tech & Tradition",
+    "destination": "Tokyo & Kyoto, Japan",
+    "duration": "10 nights / 11 days",
+    "price_usd": 2100.0,
+    "description": "Experience the neon lights of Shinjuku and the serene temples of Kyoto in Asia. JR Pass included."
+  },
+  {
+    "name": "Himalayan Heights",
+    "destination": "Kathmandu & Pokhara, Nepal",
+    "duration": "9 nights / 10 days",
+    "price_usd": 1150.0,
+    "description": "Trekking in the Annapurna range, temple visits, and mountain flight to see Everest in Asia."
+  },
+  {
+    "name": "Vietnam Discovery",
+    "destination": "Hanoi & Ha Long Bay, Vietnam",
+    "duration": "8 nights / 9 days",
+    "price_usd": 950.0,
+    "description": "Cruise through limestone karsts, explore ancient streets, and enjoy world-class street food in Asia."
+  },
+  {
+    "name": "Singapore City Lights",
+    "destination": "Singapore",
+    "duration": "4 nights / 5 days",
+    "price_usd": 1250.0,
+    "description": "Gardens by the Bay, Sentosa Island, and Marina Bay Sands experience in Asia."
+  },
+  {
+    "name": "European Explorer (Europe)",
+    "destination": "Paris, Rome, Barcelona",
+    "duration": "12 nights / 13 days",
+    "price_usd": 2299.0,
+    "description": "Three iconic cities in one trip across Europe. Guided tours, 4-star hotels, and airport transfers."
+  },
+  {
+    "name": "Swiss Alps Retreat",
+    "destination": "Interlaken & Zermatt, Switzerland",
+    "duration": "6 nights / 7 days",
+    "price_usd": 2800.0,
+    "description": "Mountain railways, fondue evenings, and breathtaking views of the Matterhorn in Europe."
+  },
+  {
+    "name": "Greek Island Hopping",
+    "destination": "Athens, Santorini & Mykonos",
+    "duration": "10 nights / 11 days",
+    "price_usd": 1850.0,
+    "description": "Ancient history in Athens followed by sunsets and white-washed villages in the Cyclades, Europe."
+  },
+  {
+    "name": "Icelandic Fire & Ice",
+    "destination": "Reykjavik, Iceland",
+    "duration": "5 nights / 6 days",
+    "price_usd": 1600.0,
+    "description": "Blue Lagoon, Northern Lights hunting, and the Golden Circle waterfalls and geysers in Europe."
+  },
+  {
+    "name": "Italian Foodie Tour",
+    "destination": "Florence & Bologna, Italy",
+    "duration": "7 nights / 8 days",
+    "price_usd": 1950.0,
+    "description": "Wine tasting in Tuscany and pasta making classes in the culinary heart of Italy, Europe."
+  },
+  {
+    "name": "London & Edinburgh",
+    "destination": "UK",
+    "duration": "8 nights / 9 days",
+    "price_usd": 1750.0,
+    "description": "Royal palaces, historic castles, and the scenic train ride through the English countryside in Europe."
+  },
+  {
+    "name": "Amsterdam Canals",
+    "destination": "Netherlands",
+    "duration": "4 nights / 5 days",
+    "price_usd": 850.0,
+    "description": "Bicycle tours, art museums, and romantic canal cruises in Europe."
+  },
+  {
+    "name": "New York City Pulse",
+    "destination": "New York, USA",
+    "duration": "5 nights / 6 days",
+    "price_usd": 1350.0,
+    "description": "Times Square, Central Park, Broadway shows, and Top of the Rock views in America."
+  },
+  {
+    "name": "Grand Canyon Adventure",
+    "destination": "Arizona, USA",
+    "duration": "6 nights / 7 days",
+    "price_usd": 1100.0,
+    "description": "Hiking, helicopter tours, and camping under the stars in the National Park, America."
+  },
+  {
+    "name": "Rio Carnival Spirit",
+    "destination": "Rio de Janeiro, Brazil",
+    "duration": "7 nights / 8 days",
+    "price_usd": 1450.0,
+    "description": "Christ the Redeemer, Copacabana beach, and vibrant samba nightlife in South America."
+  },
+  {
+    "name": "Inca Trail Trek",
+    "destination": "Cusco & Machu Picchu, Peru",
+    "duration": "9 nights / 10 days",
+    "price_usd": 1900.0,
+    "description": "A bucket-list journey through the Andes to the lost city of the Incas in South America."
+  },
+  {
+    "name": "Canadian Rockies",
+    "destination": "Banff & Jasper, Canada",
+    "duration": "8 nights / 9 days",
+    "price_usd": 2300.0,
+    "description": "Turquoise lakes, glaciers, and wildlife spotting in North America's most stunning mountains."
+  },
+  {
+    "name": "Costa Rica Eco-Tour",
+    "destination": "San Jose, Costa Rica",
+    "duration": "10 nights / 11 days",
+    "price_usd": 1550.0,
+    "description": "Rainforest zip-lining, volcanic hot springs, and sloth spotting in Central America."
+  },
+  {
+    "name": "Dubai Luxury Getaway",
+    "destination": "Dubai, UAE",
+    "duration": "4 nights / 5 days",
+    "price_usd": 1199.0,
+    "description": "Burj Khalifa, desert safari, luxury shopping, and fine dining experience in the Middle East."
+  },
+  {
+    "name": "Egyptian Pyramids",
+    "destination": "Cairo & Luxor, Egypt",
+    "duration": "7 nights / 8 days",
+    "price_usd": 1200.0,
+    "description": "The Great Pyramids, Sphinx, and a luxury cruise down the Nile River in Africa."
+  },
+  {
+    "name": "Serengeti Safari",
+    "destination": "Tanzania",
+    "duration": "6 nights / 7 days",
+    "price_usd": 3200.0,
+    "description": "The Big Five, luxury tented camps, and the Great Migration experience in Africa."
+  },
+  {
+    "name": "Moroccan Medinas",
+    "destination": "Marrakesh & Fez, Morocco",
+    "duration": "8 nights / 9 days",
+    "price_usd": 1350.0,
+    "description": "Spice markets, Sahara desert glamping, and intricate Moorish architecture in Africa."
+  },
+  {
+    "name": "Cape Town & Wine",
+    "destination": "South Africa",
+    "duration": "7 nights / 8 days",
+    "price_usd": 1650.0,
+    "description": "Table Mountain, penguin colonies, and world-class vineyards in South Africa."
+  },
+  {
+    "name": "Sydney & Great Barrier Reef",
+    "destination": "Australia",
+    "duration": "11 nights / 12 days",
+    "price_usd": 2900.0,
+    "description": "Opera House, Bondi Beach, and snorkelling in the world's largest coral reef, Oceania."
+  },
+  {
+    "name": "New Zealand South Island",
+    "destination": "Queenstown, New Zealand",
+    "duration": "9 nights / 10 days",
+    "price_usd": 2500.0,
+    "description": "Milford Sound cruise, bungee jumping, and Lord of the Rings filming locations in Oceania."
+  },
+  {
+    "name": "Fiji Island Paradise",
+    "destination": "Fiji",
+    "duration": "7 nights / 8 days",
+    "price_usd": 1700.0,
+    "description": "Crystal clear waters, kava ceremonies, and ultimate relaxation in a private resort, Oceania."
+  }
+]

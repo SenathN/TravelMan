@@ -5,7 +5,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('intents.json', '.'), ('nltk_data', 'nltk_data')],
+    datas=[('intents.json', '.'), ('packages.json', '.'), ('nltk_data', 'nltk_data')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

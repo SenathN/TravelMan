@@ -14,7 +14,7 @@ APP_NAME="TravelMate"
 ENTRY_POINT="main.py"
 DIST_DIR="dist"
 BUILD_DIR="build"
-RESOURCES=("intents.json" "nltk_data")
+RESOURCES=("intents.json" "packages.json" "nltk_data")
 
 # ANSI Color Codes
 GREEN='\033[0;32m'
@@ -38,7 +38,7 @@ pip install -r requirements.txt || { echo -e "${RED}❌ Failed to install requir
 
 # Pre-download NLTK data for bundling (Requirement 3)
 echo "   Pre-downloading NLTK data for embedding..."
-python3 -c "import nltk; nltk.download('punkt', quiet=True); nltk.download('wordnet', quiet=True); nltk.download('omw-1.4', quiet=True); nltk.download('stopwords', quiet=True)" || { echo -e "${RED}❌ Failed to download NLTK data${NC}"; exit 1; }
+python3 -c "import nltk; import os; path=os.path.abspath('nltk_data'); os.makedirs(path, exist_ok=True); nltk.download('punkt', download_dir=path, quiet=True); nltk.download('wordnet', download_dir=path, quiet=True); nltk.download('omw-1.4', download_dir=path, quiet=True); nltk.download('stopwords', download_dir=path, quiet=True)" || { echo -e "${RED}❌ Failed to download NLTK data${NC}"; exit 1; }
 
 # 2. Validation of Seeding Process (Requirement 4)
 echo -e "${BLUE}✅ Step 2: Validating database seeding logic...${NC}"
