@@ -1,2 +1,7 @@
+# Core dependencies
 nltk==3.8.1
-tk
+
+# Note: 'tkinter' is a Python standard library but may require a system package:
+# - Ubuntu/Debian: sudo apt-get install python3-tk
+# - macOS: brew install python-tk
+# - Windows: Re-install Python and check 'tcl/tk and IDLE'

@@ -11,12 +11,9 @@ NC='\033[0m' # No Color
 echo -e "${BOLD}✈️  TravelMate Test Runner${NC}"
 echo -e "============================================================"
 
-# Check if venv exists
-if [ -d "venv" ]; then
-    PYTHON_BIN="venv/bin/python"
-else
-    PYTHON_BIN="python3"
-fi
+# Setup/Initialize venv
+source ./setup_venv.sh
+PYTHON_BIN=$VENV_PYTHON
 
 # 1. Run the Full Integration Test Suite
 echo -e "\n${BLUE}${BOLD}Step 1: Running Integration Scenarios (full_test.py)${NC}"
