@@ -5,9 +5,39 @@ Handles: packages table, learned_responses table
 
 import sqlite3
 import os
+import sys
+
+def get_db_path():
+    """
+    Get the path to the database file in a private application directory.
+    Ensures the database is not in a publicly accessible location.
+    """
+    app_name = "TravelMate"
+    if sys.platform == "win32":
+        # Windows: %LOCALAPPDATA%\TravelMate\chatbot.db
+        base_dir = os.environ.get("LOCALAPPDATA", os.path.expanduser("~\\AppData\\Local"))
+    elif sys.platform == "darwin":
+        # macOS: ~/Library/Application Support/TravelMate/chatbot.db
+        base_dir = os.path.expanduser("~/Library/Application Support")
+    else:
+        # Linux/Other: ~/.local/share/TravelMate/chatbot.db
+        base_dir = os.environ.get("XDG_DATA_HOME", os.path.expanduser("~/.local/share"))
+    
+    app_dir = os.path.join(base_dir, app_name)
+    
+    # Ensure the directory exists
+    try:
+        if not os.path.exists(app_dir):
+            os.makedirs(app_dir, exist_ok=True)
+    except Exception as e:
+        # Fallback to current directory if app data is not writable
+        print(f"[DB] Warning: Could not create private directory {app_dir}: {e}")
+        app_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    return os.path.join(app_dir, "chatbot.db")
 
 # Path to the database file (created automatically on first run)
-DB_PATH = os.path.join(os.path.dirname(__file__), "chatbot.db")
+DB_PATH = get_db_path()
 
 
 def get_connection():

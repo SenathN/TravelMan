@@ -11,26 +11,51 @@ import json
 import random
 import difflib
 import re
+import sys
 import nltk
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 import database
 
-# Set NLTK data path to current directory to avoid permission issues
-nltk_data_path = os.path.join(os.path.dirname(__file__), "nltk_data")
+def get_resource_path(relative_path):
+    """Get absolute path to resource, works for dev and for PyInstaller"""
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
+# Set NLTK data path
+# For the executable, we prefer a local path that is bundled or in the app data
+nltk_data_path = get_resource_path("nltk_data")
 if not os.path.exists(nltk_data_path):
-    os.makedirs(nltk_data_path)
+    os.makedirs(nltk_data_path, exist_ok=True)
 nltk.data.path.append(nltk_data_path)
 
-# Download required NLTK data (only first time)
-nltk.download('punkt', download_dir=nltk_data_path, quiet=True)
-nltk.download('wordnet', download_dir=nltk_data_path, quiet=True)
-nltk.download('omw-1.4', download_dir=nltk_data_path, quiet=True)
-nltk.download('stopwords', download_dir=nltk_data_path, quiet=True)
+# Download required NLTK data (only if not bundled)
+try:
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    nltk.download('punkt', download_dir=nltk_data_path, quiet=True)
+try:
+    nltk.data.find('corpora/wordnet')
+except LookupError:
+    nltk.download('wordnet', download_dir=nltk_data_path, quiet=True)
+try:
+    nltk.data.find('corpora/omw-1.4')
+except LookupError:
+    nltk.download('omw-1.4', download_dir=nltk_data_path, quiet=True)
+try:
+    nltk.data.find('corpora/stopwords')
+except LookupError:
+    nltk.download('stopwords', download_dir=nltk_data_path, quiet=True)
 
 # Load static knowledge base (intents.json)
-with open('intents.json', 'r') as f:
+intents_file = get_resource_path('intents.json')
+with open(intents_file, 'r', encoding='utf-8') as f:
     intents_data = json.load(f)
 
 lemmatizer = WordNetLemmatizer()
