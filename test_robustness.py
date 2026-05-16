@@ -53,7 +53,9 @@ def test_nlp_robustness():
         ("what is the cheapest package", "Sri Lanka Heritage", "Intelligence"),
         ("show me the most expensive luxury trip", "premium luxury", "Intelligence"),
         ("lowest price packages", "budget-friendly", "Intelligence"),
-        ("best luxurious deals", "premium luxury", "Intelligence")
+        ("best luxurious deals", "premium luxury", "Intelligence"),
+        ("wt r the longest packges", "longest available", "Intelligence"),
+        ("shortest quick getaway", "shortest quick-getaway", "Intelligence")
     ]
 
     print("="*60)

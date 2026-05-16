@@ -10,6 +10,7 @@ import os
 import json
 import random
 import difflib
+import re
 import nltk
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
@@ -154,11 +155,19 @@ def get_response_for_intent(tag, user_input):
     return random.choice(responses)
 
 
+def _extract_days(duration_str):
+    """Helper to extract the number of days from a duration string for comparison."""
+    match = re.search(r'(\d+)\s+day', duration_str.lower())
+    if match:
+        return int(match.group(1))
+    return 0
+
+
 def search_packages_response(user_input):
     """
     AI Trait 2: Searching
     Query SQLite database for packages matching keywords in user input.
-    Robust against typos, multiple keywords, and handles superlatives (cheapest, etc.).
+    Robust against typos, multiple keywords, and handles superlatives (cheapest, longest, etc.).
     """
     # 1. Preprocess and identify intent context
     raw_tokens = word_tokenize(user_input.lower())
@@ -169,25 +178,39 @@ def search_packages_response(user_input):
         'package', 'tour', 'deal', 'offer', 'trip', 'holiday', 'vacation', 
         'available', 'show', 'list', 'give', 'find', 'cheapest', 'cheap', 
         'lowest', 'budget', 'expensive', 'luxurious', 'luxury', 'highest', 
-        'best', 'premium', 'price', 'cost', 'money', 'value'
+        'best', 'premium', 'price', 'cost', 'money', 'value', 'longest', 
+        'shortest', 'duration', 'length', 'days', 'nights', 'long', 'short',
+        'getaway', 'quick', 'available'
     ]
     
+    # Superlative flags
     sort_by_price_asc = any(w in raw_tokens for w in ['cheapest', 'cheap', 'lowest', 'budget'])
     sort_by_price_desc = any(w in raw_tokens for w in ['expensive', 'luxurious', 'luxury', 'highest', 'best', 'premium'])
+    sort_by_duration_desc = any(w in raw_tokens for w in ['longest', 'long', 'max'])
+    sort_by_duration_asc = any(w in raw_tokens for w in ['shortest', 'short', 'minimum', 'quick'])
     
     # 2. Search for specific destinations/names
     all_results = []
     seen_names = set()
     all_packages = database.get_all_packages()
     
-    destinations = [p['destination'].lower() for p in all_packages]
-    names = [p['name'].lower() for p in all_packages]
+    # Create a matching pool of individual words from names and destinations
+    matching_pool = set()
+    for p in all_packages:
+        matching_pool.update(preprocess_input(p['name']))
+        matching_pool.update(preprocess_input(p['destination']))
     
+    dest_name_list = list(matching_pool)
     found_specific_destination = False
     
     for kw in keywords:
-        # Ignore very short words or general context words
-        if len(kw) < 3 or kw in context_keywords:
+        # Identify general queries
+        if kw in context_keywords:
+            is_general_query = True
+            continue
+            
+        # Ignore very short words
+        if len(kw) < 3:
             continue
             
         # Try direct search
@@ -195,19 +218,16 @@ def search_packages_response(user_input):
         
         # Try fuzzy search
         if not packages:
-            # Balanced cutoff for typo tolerance without false positives
-            fuzzy_matches = difflib.get_close_matches(kw, destinations + names, n=1, cutoff=0.6)
+            # Match against the pool of individual words
+            fuzzy_matches = difflib.get_close_matches(kw, dest_name_list, n=1, cutoff=0.7)
             for match in fuzzy_matches:
-                # Extract first word to search (e.g., "Bali" from "Bali, Indonesia")
-                search_term = match.split(',')[0].split(' ')[0]
-                packages.extend(database.search_packages(search_term))
+                packages.extend(database.search_packages(match))
                 
         # Substring search as a last resort
         if not packages:
-            for d in destinations + names:
+            for d in dest_name_list:
                 if kw in d:
-                    search_term = d.split(',')[0].split(' ')[0]
-                    packages.extend(database.search_packages(search_term))
+                    packages.extend(database.search_packages(d))
                 
         if packages:
             found_specific_destination = True
@@ -216,9 +236,14 @@ def search_packages_response(user_input):
                     all_results.append(pkg)
                     seen_names.add(pkg['name'])
 
-    # 3. Decision Logic: Use full dataset if no specific destination was found 
-    # OR if the user is asking a general superlative question
-    if not found_specific_destination or (not all_results and (sort_by_price_asc or sort_by_price_desc)):
+    # 3. Decision Logic: 
+    # If a superlative is used (cheapest, longest, etc.) AND no specific destination was mentioned,
+    # we should scan the FULL dataset to be truly intelligent.
+    is_superlative_query = any([sort_by_price_asc, sort_by_price_desc, sort_by_duration_asc, sort_by_duration_desc])
+    
+    if is_superlative_query and not found_specific_destination:
+        all_results = all_packages
+    elif not all_results and (is_general_query or is_superlative_query):
         all_results = all_packages
 
     if not all_results:
@@ -231,6 +256,12 @@ def search_packages_response(user_input):
     elif sort_by_price_desc:
         all_results.sort(key=lambda x: x['price'], reverse=True)
         intro = "Based on your request, here are our premium luxury packages:\n\n"
+    elif sort_by_duration_desc:
+        all_results.sort(key=lambda x: _extract_days(x['duration']), reverse=True)
+        intro = "Based on your request, here are our longest available tours:\n\n"
+    elif sort_by_duration_asc:
+        all_results.sort(key=lambda x: _extract_days(x['duration']))
+        intro = "Based on your request, here are our shortest quick-getaway packages:\n\n"
     else:
         intro = "Here are some packages I found:\n\n"
 

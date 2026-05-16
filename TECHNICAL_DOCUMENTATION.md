@@ -19,7 +19,7 @@ The TravelMate chatbot was developed to assist users in exploring and booking ho
 ## 4. AI Traits
 - **NLP (Natural Language Processing)**: Uses tokenization, stop-word removal, and lemmatization to normalize user input.
 - **Searching**: Executes keyword-based queries against a relational database with fuzzy fallback.
-- **Contextual Intelligence**: Handles superlative queries (e.g., "cheapest", "most expensive") by dynamically sorting and filtering database results based on user intent.
+- **Contextual Intelligence**: Handles superlative queries (e.g., "cheapest", "most expensive", "longest", "shortest") by dynamically sorting and filtering database results based on user intent (price or duration).
 - **Machine Learning**: Features an interactive "Learning Mode" where the bot updates its own knowledge base based on user corrections.
 
 ## 5. Design Architecture (Three-Tier)
