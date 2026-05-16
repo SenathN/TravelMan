@@ -207,15 +207,9 @@ def search_packages_response(user_input):
     general_trigger_keywords = {
         'package', 'tour', 'deal', 'offer', 'trip', 'holiday', 'vacation', 
         'available', 'show', 'list', 'give', 'find', 'getaway', 'quick', 'everything',
-        'anything', 'interesting', 'recommend', 'suggestion', 'idea', 'popular'
+        'anything', 'interesting', 'recommend', 'suggestion', 'idea', 'popular',
+        'compare', 'difference', 'variance', 'vs', 'versus'
     }.union(CONTINENTS)
-    
-    # Contextual keywords for superlatives/filters
-    filter_keywords = [
-        'cheapest', 'cheap', 'lowest', 'budget', 'expensive', 'luxurious', 'luxury', 
-        'highest', 'best', 'premium', 'price', 'cost', 'money', 'value', 'longest', 
-        'shortest', 'duration', 'length', 'days', 'nights', 'long', 'short'
-    ]
     
     # Superlative flags
     sort_by_price_asc = any(w in raw_tokens for w in ['cheapest', 'cheap', 'lowest', 'budget'])
@@ -223,6 +217,25 @@ def search_packages_response(user_input):
     sort_by_duration_desc = any(w in raw_tokens for w in ['longest', 'long', 'max'])
     sort_by_duration_asc = any(w in raw_tokens for w in ['shortest', 'short', 'minimum', 'quick'])
     
+    # Keywords for superlatives/filtering that shouldn't be treated as specific search terms
+    filter_keyword_stems = {
+        'cheap', 'low', 'budget', 'expensive', 'luxury', 'high', 'best', 'premium',
+        'long', 'short', 'duration', 'price', 'cost', 'under', 'over', 'above', 'below',
+        'day', 'night'
+    }
+
+    # Numerical filters (Range filtering)
+    price_limit = None
+    price_operator = None # 'under' or 'over'
+    
+    price_match = re.search(r'(under|below|less than|over|above|more than|budget of)\s+\$?\s*(\d+)', user_input.lower())
+    if price_match:
+        price_operator = price_match.group(1)
+        price_limit = float(price_match.group(2))
+    
+    # Comparison check
+    is_comparison = any(w in raw_tokens for w in ['compare', 'difference', 'variance', 'vs', 'versus'])
+
     # 2. Search for specific destinations/names
     all_results = []
     seen_names = set()
@@ -237,6 +250,7 @@ def search_packages_response(user_input):
     dest_name_list = list(matching_pool)
     found_specific_destination = False
     is_explicit_general_request = False
+    unknown_geo_keywords = []
     
     for kw in keywords:
         # Identify explicit requests for general information
@@ -253,6 +267,10 @@ def search_packages_response(user_input):
                             seen_names.add(pkg['name'])
             continue
             
+        # Ignore filter-related keywords for destination search
+        if any(stem in kw for stem in filter_keyword_stems):
+            continue
+
         # Ignore very short words
         if len(kw) < 3:
             continue
@@ -281,24 +299,53 @@ def search_packages_response(user_input):
                 if pkg['name'] not in seen_names:
                     all_results.append(pkg)
                     seen_names.add(pkg['name'])
+        elif kw not in ['show', 'find', 'give', 'list', 'tours', 'packages'] and not kw.isdigit():
+            # Keep track of words that might be unknown destinations (exclude numbers)
+            unknown_geo_keywords.append(kw)
 
     # 3. Decision Logic: 
-    # If a superlative is used (cheapest, longest, etc.) OR an explicit general request (show packages)
-    # AND no specific destination was found, we should scan the FULL dataset.
     is_superlative_query = any([sort_by_price_asc, sort_by_price_desc, sort_by_duration_asc, sort_by_duration_desc])
     
     if not found_specific_destination:
-        if is_superlative_query or is_explicit_general_request:
+        # If they asked for a specific unknown place, don't fallback to "all"
+        if unknown_geo_keywords:
+            return f"I couldn't find any packages for '{', '.join(unknown_geo_keywords)}'. Try asking about 'Bali', 'Europe', or 'Thailand'!"
+            
+        if is_explicit_general_request or is_superlative_query or price_limit or is_comparison:
             all_results = all_packages
         else:
-            # No specific destination and no explicit general/superlative trigger
-            # Return a "not found" message which process_user_input will handle
             return None
 
-    if not all_results:
-        return "I couldn't find any packages matching your query. Try asking about 'Bali', 'Maldives', 'Europe', 'Thailand', 'Sri Lanka', or 'Dubai'."
+    # Apply Numerical Filtering
+    if price_limit:
+        if any(op in price_operator for op in ['under', 'below', 'less', 'budget']):
+            all_results = [p for p in all_results if p['price'] <= price_limit]
+        elif any(op in price_operator for op in ['over', 'above', 'more']):
+            all_results = [p for p in all_results if p['price'] >= price_limit]
 
-    # 4. Apply Intelligence: Sorting
+    if not all_results:
+        return "I couldn't find any packages matching your specific criteria. Try adjusting your filters or destination!"
+
+    # 4. Handle Comparisons
+    if is_comparison and len(all_results) >= 2:
+        # If more than 2, just compare the top 2
+        p1, p2 = all_results[0], all_results[1]
+        diff = abs(p1['price'] - p2['price'])
+        perc = (diff / min(p1['price'], p2['price'])) * 100
+        
+        d1 = _extract_days(p1['duration'])
+        d2 = _extract_days(p2['duration'])
+        
+        response = f"📊 **Comparison: {p1['name']} vs {p2['name']}**\n\n"
+        response += f"💰 **Price:** ${p1['price']} vs ${p2['price']} "
+        response += f"(Difference: ${diff:.2f}, ~{perc:.1f}%)\n"
+        response += f"⏱ **Duration:** {p1['duration']} vs {p2['duration']}\n"
+        response += f"📍 **Destination:** {p1['destination']} vs {p2['destination']}\n"
+        response += f"📝 **Highlights:** {p1['description'][:50]}... vs {p2['description'][:50]}...\n\n"
+        response += "Which one looks better for your next adventure?"
+        return response
+
+    # 5. Apply Intelligence: Sorting
     if sort_by_price_asc:
         all_results.sort(key=lambda x: x['price'])
         intro = "Based on your request, here are our most budget-friendly packages:\n\n"
@@ -314,7 +361,7 @@ def search_packages_response(user_input):
     else:
         intro = "Here are some packages I found:\n\n"
 
-    # 5. Format Response
+    # 6. Format Response
     response = intro
     for pkg in all_results[:3]:
         response += f"📦 {pkg['name']}\n"

@@ -29,7 +29,7 @@
     },
     {
       "tag": "packages",
-      "patterns": ["packages", "tour", "holiday", "vacation", "deals", "offers", "what do you have", "show packages", "available tours", "travel packages", "trips", "asia", "europe", "america", "africa", "oceania", "middle east", "caribbean"],
+      "patterns": ["packages", "tour", "holiday", "vacation", "deals", "offers", "what do you have", "show packages", "available tours", "travel packages", "trips", "asia", "europe", "america", "africa", "oceania", "middle east", "caribbean", "compare", "difference", "variance", "vs"],
       "responses": ["__SEARCH_PACKAGES__"]
     },
     {
