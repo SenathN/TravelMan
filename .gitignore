@@ -1,2 +1,19 @@
-nltk_data/
+# Python
 __pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+bin/
+lib/
+share/
+
+# NLTK data
+nltk_data/
+
+# Database
+chatbot.db
+
+# OS
+.DS_Store
